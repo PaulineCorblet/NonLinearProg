@@ -6,7 +6,7 @@
 # A*x  <= b
 # cons_lb <= h(x) <= cons_ub
 
-mutable struct OptProblem{f,g,h,J,J_struct} <: MOI.AbstractNLPEvaluator
+mutable struct OptProblemFmincon{f,g,h,J,J_struct} <: MOI.AbstractNLPEvaluator
     obj::f
     obj_grad::g
     cons::h
@@ -14,7 +14,7 @@ mutable struct OptProblem{f,g,h,J,J_struct} <: MOI.AbstractNLPEvaluator
     cons_jac_struct::J_struct
 end
 
-function MOI.initialize(prob::OptProblem, requested_features::Vector{Symbol})
+function MOI.initialize(prob::OptProblemFmincon, requested_features::Vector{Symbol})
     for feat in requested_features
         if !(feat in MOI.features_available(prob))
             error("Unsupported feature $feat")
@@ -22,7 +22,7 @@ function MOI.initialize(prob::OptProblem, requested_features::Vector{Symbol})
     end
 end
 
-function MOI.features_available(prob::OptProblem)
+function MOI.features_available(prob::OptProblemFmincon)
     if isnothing(prob.obj_grad) & isnothing(prob.cons_jac)
         return
     elseif !isnothing(prob.obj_grad) & isnothing(prob.cons_jac)
@@ -35,10 +35,10 @@ function MOI.features_available(prob::OptProblem)
 end
 
 # Objective
-MOI.eval_objective(prob::OptProblem, x) = prob.obj(x)
+MOI.eval_objective(prob::OptProblemFmincon, x) = prob.obj(x)
 
 # Objective gradient
-function MOI.eval_objective_gradient(prob::OptProblem, grad_f, x) 
+function MOI.eval_objective_gradient(prob::OptProblemFmincon, grad_f, x) 
     grad_temp = prob.obj_grad(x)
     for j=1:length(x)
         grad_f[j] = grad_temp[j]
@@ -46,19 +46,19 @@ function MOI.eval_objective_gradient(prob::OptProblem, grad_f, x)
 end
 
 # Non linear constraints
-function MOI.eval_constraint(prob::OptProblem, cons_h, x)
+function MOI.eval_constraint(prob::OptProblemFmincon, cons_h, x)
     cons_temp = prob.cons(x)
     cons_h .= cons_temp
 end
 
 # Non linear constraints jacobian
-function MOI.eval_constraint_jacobian(prob::OptProblem, jac_J, x)
+function MOI.eval_constraint_jacobian(prob::OptProblemFmincon, jac_J, x)
     cons_jac_temp = prob.cons_jac(x)
     jac_J .= vec(cons_jac_temp)
 end
 
 # Non linear constraints jacobian structure
-MOI.jacobian_structure(prob::OptProblem) = prob.cons_jac_struct
+MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 
 
 # Wrapper
@@ -150,7 +150,7 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
     end
 
     # Pass non-linear constraints & objective function
-    prob       = OptProblem(f,g,h,J,J_struct) 
+    prob       = OptProblemFmincon(f,g,h,J,J_struct) 
     block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
     MOI.set(optimizer, MOI.NLPBlock(), block_data)
   
