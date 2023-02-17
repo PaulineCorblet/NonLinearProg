@@ -152,9 +152,12 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
         MOI.set(optimizer, MOI.NLPBlock(), block_data)
     else
-        # J_struct = nothing
-        # cons_lb  = Float64[]
-        # cons_ub  = Float64[]
+        J_struct = nothing
+        cons_lb  = Float64[]
+        cons_ub  = Float64[]
+        prob       = OptProblem(f,g,h,J,J_struct) 
+        block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
+        MOI.set(optimizer, MOI.NLPBlock(), block_data)
         println(string("Number of nonlinear constraints:         ",0,"."))
     end
   
