@@ -1,0 +1,4 @@
+name = "NonLinearProg"
+uuid = "59a653e0-4fd1-4c37-892e-cada1571c056"
+authors = ["pauline.corblet <pauline.corblet@sciencespo.fr>"]
+version = "0.1.0"
