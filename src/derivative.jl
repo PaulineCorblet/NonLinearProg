@@ -11,7 +11,6 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
     # Compute numerical derivatives
     if method == "forward"
         for j=1:nJ
-            sleep(1)
             print(string("Computing derivatives using ", method," method, ",j,"/",nJ,".","\r"))
             x1     = copy(x0)
             x1[j]  = x1[j] + epsilon
