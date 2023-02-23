@@ -56,3 +56,22 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
     end
     return J
 end
+
+
+
+function derivative_par(f,x)
+
+    # Insert function
+    function insert(x,xk,k)
+        new_x = copy(x)
+        new_x[k] = xk
+        return new_x
+    end
+
+
+    # Parallel computing
+    J = pmap(k -> NonLinearProg.derivative(xk -> f(insert(x,xk,k)), x[k]), collect(1:length(x)))
+
+    # Return
+    return reduce(vcat, J)
+end
