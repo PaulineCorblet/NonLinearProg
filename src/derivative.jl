@@ -52,9 +52,7 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
     end
     if nJ>1
         println()
+        println("Done.")
     end
-
-    println("Done.")
-
     return J
 end
