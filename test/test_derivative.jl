@@ -31,14 +31,24 @@ NonLinearProg.derivative(fun4, [1.0; 2.0])
 
 
 ### Parallel version
-addprocs(2)
+using Distributed
+addprocs()
+workers()
 
+@everywhere using NonLinearProg
 @everywhere function fun(x)
+    sleep(0.1)
     return sum(x.*x)
 end
 
-NonLinearProg.derivative_par(fun,rand(10))
 
-function fun(x)
-    return sum(x.*x)
-end
+x0 = rand(100)
+
+start = time()
+NonLinearProg.derivative_par(fun,x0)
+println(string("Time elapsed: ", time() - start))
+
+start = time()
+NonLinearProg.derivative(fun,x0)
+println(string("Time elapsed: ", time() - start))
+
