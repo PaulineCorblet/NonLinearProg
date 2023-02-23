@@ -10,15 +10,32 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
 
     # Compute numerical derivatives
     if method == "forward"
-        for j=1:nJ
+
+        if nJ == 1
+            x1     = x0 + epsilon
+            f1     = fun(x1)
+            J      = (f1 - f0)/epsilon
+        else
+            for j=1:nJ
             print(string("Computing derivatives using ", method," method, ",j,"/",nJ,".","\r"))
             x1     = copy(x0)
             x1[j]  = x1[j] + epsilon
             f1     = fun(x1)
             J[:,j] .= (f1 - f0)/epsilon
+            end
         end
+
     elseif method == "central"
-        for j=1:nJ
+
+        if nJ == 1
+            x1  = x1 - epsilon
+            f1  = fun(x1)
+            x2  = x2 + epsilon
+            f2  = fun(x2)
+            J   = (f2 - f1)/(2*epsilon)
+        else
+            for j=1:nJ
+            print(string("Computing derivatives using ", method," method, ",j,"/",nJ,".","\r"))
             x1     = copy(x0)
             x1[j]  = x1[j] - epsilon
             f1     = fun(x1)
@@ -26,7 +43,7 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
             x2[j]  = x2[j] + epsilon
             f2     = fun(x2)
             J[:,j] .= (f2 - f1)/(2*epsilon)
-        end 
+            end 
     end
 
     if nI == 1
