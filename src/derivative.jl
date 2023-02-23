@@ -44,6 +44,7 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
             f2     = fun(x2)
             J[:,j] .= (f2 - f1)/(2*epsilon)
             end 
+        end
     end
 
     if nI == 1
