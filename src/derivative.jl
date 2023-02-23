@@ -70,7 +70,7 @@ function derivative_par(f,x)
 
 
     # Parallel computing
-    J = pmap(k -> NonLinearProg.derivative(xk -> f(insert(x,xk,k)), x[k]), collect(1:length(x)))
+    J = Distributed.pmap(k -> NonLinearProg.derivative(xk -> f(insert(x,xk,k)), x[k]), collect(1:length(x)))
 
     # Return
     return reduce(vcat, J)
