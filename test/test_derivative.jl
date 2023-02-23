@@ -31,6 +31,9 @@ NonLinearProg.derivative(fun4, [1.0; 2.0])
 
 
 ### Parallel version
+using Distributed
+addprocs(2)
+
 @everywhere function fun(x)
     return sum(x.*x)
 end
