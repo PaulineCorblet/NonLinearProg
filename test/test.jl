@@ -1,3 +1,5 @@
+using NonLinearProg
+
 # Test with Rosenbrock function
 function fun(x)
     return (1-x[1])^2+100*(x[2]-x[1]^2)^2

@@ -65,7 +65,7 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
                                   g = nothing, h = nothing, J = nothing, 
                                   lb = nothing, ub = nothing, cons_lb = nothing, cons_ub = nothing,
-                                  optimizer = Ipopt.Optimizer())
+                                  optimizer = Ipopt.Optimizer(), reltol = nothing)
 
     # Initialize
     MOI.empty!(optimizer)
@@ -140,23 +140,26 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
             end
         end
         J_struct = J_struct[:]
-        prob       = OptProblemFmincon(f,g,h,J,J_struct) 
-        block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
-        MOI.set(optimizer, MOI.NLPBlock(), block_data)
         println(string("Number of nonlinear constraints:         ",K,"."))
     else
-        # J_struct = nothing
-        # cons_lb  = Float64[]
-        # cons_ub  = Float64[]
+        J_struct = nothing
+        cons_lb  = Float64[]
+        cons_ub  = Float64[]
 
         println(string("Number of nonlinear constraints:         ",0,"."))
     end
 
     # Pass non-linear constraints & objective function
-
+    prob       = OptProblemFmincon(f,g,h,J,J_struct) 
+    block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
+    MOI.set(optimizer, MOI.NLPBlock(), block_data)
   
     # Optimize
     MOI.set(optimizer, MOI.ObjectiveSense(), MOI.MIN_SENSE)
+
+    # if !nothing(reltol)
+    #     MOI.set(optimizer, MOI.RawOptimizerAttribute("reltol"), reltol)
+    # end
     MOI.optimize!(optimizer)
     xval     = MOI.get(optimizer, MOI.VariablePrimal(), x)
     objval   = MOI.get(optimizer, MOI.ObjectiveValue())
