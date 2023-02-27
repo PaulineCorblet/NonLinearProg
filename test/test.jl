@@ -11,6 +11,7 @@ end
 
 x0 = [0.9266578756641997; 0.4065842040265859]
 xopt, objopt, termstat = NonLinearProg.fmincon(fun,x0,g=gfun)
+xopt, objopt, termstat = NonLinearProg.fmincon(fun,x0,g=gfun,tol=1e-4)
 
 # Add constraint: on the unit disk
 function h(x)

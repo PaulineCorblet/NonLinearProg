@@ -65,7 +65,7 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
                                   g = nothing, h = nothing, J = nothing, 
                                   lb = nothing, ub = nothing, cons_lb = nothing, cons_ub = nothing,
-                                  optimizer = Ipopt.Optimizer(), reltol = nothing)
+                                  optimizer = Ipopt.Optimizer(), tol = nothing)
 
     # Initialize
     MOI.empty!(optimizer)
@@ -157,9 +157,10 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
     # Optimize
     MOI.set(optimizer, MOI.ObjectiveSense(), MOI.MIN_SENSE)
 
-    # if !nothing(reltol)
-    #     MOI.set(optimizer, MOI.RawOptimizerAttribute("reltol"), reltol)
-    # end
+    if ~isnothing(tol)
+        MOI.set(optimizer, MOI.RawOptimizerAttribute("tol"), tol)
+    end
+
     MOI.optimize!(optimizer)
     xval     = MOI.get(optimizer, MOI.VariablePrimal(), x)
     objval   = MOI.get(optimizer, MOI.ObjectiveValue())
