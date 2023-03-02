@@ -20,7 +20,7 @@ function derivative(fun::Function, x0; epsilon = nothing, method = "forward")
         end
 
         if nJ == 1
-            x1      = x0 + epsilon[1]
+            x1      = x0 .+ epsilon[1]
             f1      = fun(x1)
             J[:,1] .= (f1 - f0)/epsilon[1]
         else
@@ -41,9 +41,9 @@ function derivative(fun::Function, x0; epsilon = nothing, method = "forward")
         end
 
         if nJ == 1
-            x1      = x1 - epsilon[1]
+            x1      = x1 .- epsilon[1]
             f1      = fun(x1)
-            x2      = x2 + epsilon[1]
+            x2      = x2 .+ epsilon[1]
             f2      = fun(x2)
             J[:,1] .= (f2 - f1)/(2*epsilon[1])
         else
