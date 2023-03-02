@@ -1,6 +1,6 @@
 ### A function to compute the gradient of scalar-valued functions or the jacobian of vector-valued functions.
 
-function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
+function derivative(fun::Function, x0; epsilon = nothing, method = "forward")
 
     # Dimensions
     f0 = fun(x0)
@@ -8,41 +8,54 @@ function derivative(fun::Function, x0; epsilon = 1e-6, method = "forward")
     nJ = length(x0)
     J = zeros(nI,nJ)
 
+    # Step size (based on Calculus.jl and Numerical recipes)
+    scale = maximum([ones(nJ) abs.(x0)], dims=2)[:]
+
     # Compute numerical derivatives
     if method == "forward"
+        if isnothing(epsilon)
+            epsilon = sqrt.(eps.(eltype.(x0))) .* scale
+        else
+            epsilon = fill(epsilon, nJ)
+        end
 
         if nJ == 1
-            x1      = x0 .+ epsilon
+            x1      = x0 + epsilon[1]
             f1      = fun(x1)
-            J[:,1] .= (f1 - f0)/epsilon
+            J[:,1] .= (f1 - f0)/epsilon[1]
         else
             for j=1:nJ
-            print(string("Computing derivatives using ", method," method, ",j,"/",nJ,".","\r"))
+            print(string("Computing derivatives using ", method," method, ",j,"/",nJ,". epsilon = ",epsilon[j],".","\r"))
             x1      = copy(x0)
-            x1[j]   = x1[j] + epsilon
+            x1[j]   = x1[j] + epsilon[j]
             f1      = fun(x1)
-            J[:,j] .= (f1 - f0)/epsilon
+            J[:,j] .= (f1 - f0)/epsilon[j]
             end
         end
 
     elseif method == "central"
+        if isnothing(epsilon)
+            epsilon = cbrt.(eps.(eltype.(x0))) .* scale
+        else
+            epsilon = fill(epsilon, nJ)
+        end
 
         if nJ == 1
-            x1      = x1 .- epsilon
+            x1      = x1 - epsilon[1]
             f1      = fun(x1)
-            x2      = x2 .+ epsilon
+            x2      = x2 + epsilon[1]
             f2      = fun(x2)
-            J[:,1] .= (f2 - f1)/(2*epsilon)
+            J[:,1] .= (f2 - f1)/(2*epsilon[1])
         else
             for j=1:nJ
-            print(string("Computing derivatives using ", method," method, ",j,"/",nJ,".","\r"))
+            print(string("Computing derivatives using ", method," method, ",j,"/",nJ,". epsilon = ",epsilon[j],".","\r"))
             x1      = copy(x0)
-            x1[j]   = x1[j] - epsilon
+            x1[j]   = x1[j] - epsilon[j]
             f1      = fun(x1)
             x2      = copy(x0)
-            x2[j]   = x2[j] + epsilon
+            x2[j]   = x2[j] + epsilon[j]
             f2      = fun(x2)
-            J[:,j] .= (f2 - f1)/(2*epsilon)
+            J[:,j] .= (f2 - f1)/(2*epsilon[j])
             end 
         end
     end
