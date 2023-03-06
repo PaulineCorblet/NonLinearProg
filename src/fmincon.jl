@@ -63,9 +63,9 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 
 # Wrapper
 function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
-                                   g = nothing, h = nothing, J = nothing, 
-                                   lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, 
-                                   optimizer = Ipopt.Optimizer, options = nothing)
+                        g = nothing, h = nothing, J = nothing, 
+                        lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, 
+                        optimizer = Ipopt.Optimizer, options = nothing)
 
     # Initialize
     MOI.empty!(optimizer)
