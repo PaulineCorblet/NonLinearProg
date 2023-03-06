@@ -25,5 +25,5 @@ end
 
 cons_ub = fill(1., 1)
 lb = fill(.9, 2)
-xopt, objopt, termstat = NonLinearProg.fmincon(fun, x0; g=gfun, h=h, J=J, cons_ub=cons_ub)
-xopt, objopt, termstat = NonLinearProg.fmincon(fun,x0; g=gfun, h=h, J=J, cons_ub=cons_ub, lb=lb)
+xopt, objopt, termstat = NonLinearProg.fmincon(fun, x0; g=gfun, h=h, J=J, nlcon_ub=cons_ub)
+xopt, objopt, termstat = NonLinearProg.fmincon(fun,x0; g=gfun, h=h, J=J, nlcon_ub=cons_ub, lb=lb)
