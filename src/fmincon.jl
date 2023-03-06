@@ -4,7 +4,7 @@
 # lb <= x <= ub
 # Aeq*x = beq
 # A*x  <= b
-# cons_lb <= h(x) <= cons_ub
+# nlcon_lb <= h(x) <= nlcon_ub
 
 mutable struct OptProblemFmincon{f,g,h,J,J_struct} <: MOI.AbstractNLPEvaluator
     obj::f
@@ -62,10 +62,9 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 
 
 # Wrapper
-function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
+function fmincon(f, x0, optimizer; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
                                   g = nothing, h = nothing, J = nothing, 
-                                  lb = nothing, ub = nothing, cons_lb = nothing, cons_ub = nothing,
-                                  optimizer = Ipopt.Optimizer(), tol = nothing)
+                                  lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, tol = nothing)
 
     # Initialize
     MOI.empty!(optimizer)
@@ -120,19 +119,19 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
     # Add nonlinear constraints
     if ~isnothing(h)
 
-        if ~isnothing(cons_lb) & isnothing(cons_ub)
-            cons_ub = fill(Inf, length(cons_lb))
+        if ~isnothing(nlcon_lb) & isnothing(nlcon_ub)
+            nlcon_ub = fill(Inf, length(nlcon_lb))
         end
-        if  isnothing(cons_lb) & ~isnothing(cons_ub)
-            cons_lb = fill(-Inf, length(cons_ub))
+        if  isnothing(nlcon_lb) & ~isnothing(nlcon_ub)
+            nlcon_lb = fill(-Inf, length(nlcon_ub))
         end
-        if isnothing(cons_lb) & isnothing(cons_ub)
+        if isnothing(nlcon_lb) & isnothing(nlcon_ub)
             K       = length(h(x0)) #or perhaps we should throw an error
-            cons_lb = fill(-Inf, K)
-            cons_ub = fill(Inf, K)
+            nlcon_lb = fill(-Inf, K)
+            nlcon_ub = fill(Inf, K)
         end
 
-        K        = length(cons_lb)
+        K        = length(nlcon_lb)
         J_struct = Matrix{Tuple{Int64,Int64}}(undef,K,n)
         for i=1:K
             for j=1:n
@@ -143,15 +142,15 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         println(string("Number of nonlinear constraints:         ",K,"."))
     else
         J_struct = nothing
-        cons_lb  = Float64[]
-        cons_ub  = Float64[]
+        nlcon_lb  = Float64[]
+        nlcon_ub  = Float64[]
 
         println(string("Number of nonlinear constraints:         ",0,"."))
     end
 
     # Pass non-linear constraints & objective function
     prob       = OptProblemFmincon(f,g,h,J,J_struct) 
-    block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(cons_lb, cons_ub), prob, true)
+    block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(nlcon_lb, nlcon_ub), prob, true)
     MOI.set(optimizer, MOI.NLPBlock(), block_data)
   
     # Optimize
