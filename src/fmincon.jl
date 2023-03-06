@@ -63,8 +63,9 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 
 # Wrapper
 function fmincon(f, x0, optimizer; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
-                                  g = nothing, h = nothing, J = nothing, 
-                                  lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, tol = nothing)
+                                   g = nothing, h = nothing, J = nothing, 
+                                   lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, 
+                                   options = nothing)
 
     # Initialize
     MOI.empty!(optimizer)
@@ -156,8 +157,10 @@ function fmincon(f, x0, optimizer; A = nothing, b = nothing, Aeq = nothing, beq 
     # Optimize
     MOI.set(optimizer, MOI.ObjectiveSense(), MOI.MIN_SENSE)
 
-    if ~isnothing(tol)
-        MOI.set(optimizer, MOI.RawOptimizerAttribute("tol"), tol)
+    if ~isnothing(options)
+        for key = keys(options)
+        MOI.set(optimizer, MOI.RawOptimizerAttribute(string(key)), options[key])
+        end
     end
 
     MOI.optimize!(optimizer)
