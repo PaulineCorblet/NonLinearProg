@@ -96,6 +96,7 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         for i=1:size(Aeq,1)
             MOI.add_constraint(optimizer, MOI.ScalarAffineFunction(MOI.ScalarAffineTerm.(Aeq[i,:], x), 0.0), MOI.EqualTo(beq[i]))
         end
+       
         println(string("Number of linear equality constraints:   ",size(Aeq,1),"."))
     else
         println(string("Number of linear equality constraints:   ",0,"."))
