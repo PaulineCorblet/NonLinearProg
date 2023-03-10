@@ -48,7 +48,8 @@ end
 # Non linear constraints
 function MOI.eval_constraint(prob::OptProblemFmincon, cons_h, x)
     cons_temp = prob.cons(x)
-    cons_h .= cons_temp
+    # cons_h .= cons_temp
+    cons_h[1:length(cons_temp)] .= cons_temp
 end
 
 # Non linear constraints jacobian
