@@ -141,12 +141,6 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         end
         J_struct = J_struct[:]
         println(string("Number of nonlinear constraints:         ",K,"."))
-
-    # Pass non-linear constraints & objective function
-    prob       = OptProblemFmincon(f,g,h,J,J_struct) 
-    block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(nlcon_lb, nlcon_ub), prob, true)
-    MOI.set(optimizer, MOI.NLPBlock(), block_data)
-
     else
         J_struct = nothing
         nlcon_lb  = Float64[]
@@ -155,6 +149,10 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         println(string("Number of nonlinear constraints:         ",0,"."))
     end
 
+    # Pass non-linear constraints & objective function
+    prob       = OptProblemFmincon(f,g,h,J,J_struct) 
+    block_data = MOI.NLPBlockData(MOI.NLPBoundsPair.(nlcon_lb, nlcon_ub), prob, true)
+    MOI.set(optimizer, MOI.NLPBlock(), block_data)
   
     # Optimize
     MOI.set(optimizer, MOI.ObjectiveSense(), MOI.MIN_SENSE)
