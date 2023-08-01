@@ -81,7 +81,7 @@ end
 function derivative_par(f::Function, x; epsilon = nothing, method = "forward", print_level = 0)
 
     # Insert function
-    function insert(x,xk,k)
+    @everywhere function insert(x,xk,k)
         new_x = copy(x)
         new_x[k] = xk
         return new_x
