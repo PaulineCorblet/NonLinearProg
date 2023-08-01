@@ -86,7 +86,7 @@ end
 function derivative_par(f::Function, x; epsilon = nothing, method = "forward", print_level = 0)
 
     # Parallel computing
-    J = Distributed.pmap(k -> NonLinearProg.derivative(xk -> f(derivative_insert(x,xk,k)), x[k], epsilon = epsilon, method = method, print_level = print_level), collect(1:length(x)))
+    J = Distributed.pmap(k -> NonLinearProg.derivative(xk -> f(NonLinearProg.derivative_insert(x,xk,k)), x[k], epsilon = epsilon, method = method, print_level = print_level), collect(1:length(x)))
 
     # Return
     return reduce(vcat, J)
