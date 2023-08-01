@@ -76,20 +76,17 @@ function derivative(fun::Function, x0; epsilon = nothing, method = "forward", pr
     return J
 end
 
+function derivative_insert(x,xk,k)
+    new_x = copy(x)
+    new_x[k] = xk
+    return new_x
+end
 
 
 function derivative_par(f::Function, x; epsilon = nothing, method = "forward", print_level = 0)
 
-    # Insert function
-    Distributed.@everywhere function insert(x,xk,k)
-        new_x = copy(x)
-        new_x[k] = xk
-        return new_x
-    end
-
-
     # Parallel computing
-    J = Distributed.pmap(k -> NonLinearProg.derivative(xk -> f(insert(x,xk,k)), x[k], epsilon = epsilon, method = method, print_level = print_level), collect(1:length(x)))
+    J = Distributed.pmap(k -> NonLinearProg.derivative(xk -> f(derivative_insert(x,xk,k)), x[k], epsilon = epsilon, method = method, print_level = print_level), collect(1:length(x)))
 
     # Return
     return reduce(vcat, J)
