@@ -66,16 +66,20 @@ MOI.jacobian_structure(prob::OptProblemFmincon) = prob.cons_jac_struct
 function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing, 
                         g = nothing, h = nothing, J = nothing, 
                         lb = nothing, ub = nothing, nlcon_lb = nothing, nlcon_ub = nothing, 
-                        optimizer = Ipopt.Optimizer(), kwargs...)
+                        optimizer = Ipopt.Optimizer(), print_summary = true, kwargs...)
 
     # Initialize
     MOI.empty!(optimizer)
-    println("Problem summary:")
+    if print_summary
+        println("Problem summary:")
+    end
 
     # Add variables
     n = length(x0)
     x = MOI.add_variables(optimizer, n)
-    println(string("Number of variables:                     ", n,"."))
+    if print_summary
+        println(string("Number of variables:                     ", n,"."))
+    end
 
     # Add starting value
     for i=1:n
@@ -87,9 +91,13 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         for i=1:size(A,1)
             MOI.add_constraint(optimizer, MOI.ScalarAffineFunction(MOI.ScalarAffineTerm.(A[i,:], x), 0.0), MOI.LessThan(b[i]))
         end
-        println(string("Number of linear inequality constraints: ",size(A,1),"."))
+        if print_summary
+            println(string("Number of linear inequality constraints: ",size(A,1),"."))
+        end
     else
-        println(string("Number of linear inequality constraints: ",0,"."))
+        if print_summary
+            println(string("Number of linear inequality constraints: ",0,"."))
+        end
     end
 
     # Add linear inequality constraints
@@ -97,10 +105,13 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
         for i=1:size(Aeq,1)
             MOI.add_constraint(optimizer, MOI.ScalarAffineFunction(MOI.ScalarAffineTerm.(Aeq[i,:], x), 0.0), MOI.EqualTo(beq[i]))
         end
-       
-        println(string("Number of linear equality constraints:   ",size(Aeq,1),"."))
+        if print_summary
+            println(string("Number of linear equality constraints:   ",size(Aeq,1),"."))
+        end
     else
-        println(string("Number of linear equality constraints:   ",0,"."))
+        if print_summary
+            println(string("Number of linear equality constraints:   ",0,"."))
+        end
     end
 
     # Add variable bounds
@@ -142,13 +153,16 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
             end
         end
         J_struct = J_struct[:]
-        println(string("Number of nonlinear constraints:         ",K,"."))
+        if print_summary
+            println(string("Number of nonlinear constraints:         ",K,"."))
+        end
     else
         J_struct = nothing
         nlcon_lb  = Float64[]
         nlcon_ub  = Float64[]
-
-        println(string("Number of nonlinear constraints:         ",0,"."))
+        if print_summary
+            println(string("Number of nonlinear constraints:         ",0,"."))
+        end
     end
 
     # Pass non-linear constraints & objective function
