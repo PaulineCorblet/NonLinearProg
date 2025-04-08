@@ -174,7 +174,7 @@ function fmincon(f, x0; A = nothing, b = nothing, Aeq = nothing, beq = nothing,
     MOI.set(optimizer, MOI.ObjectiveSense(), MOI.MIN_SENSE)
 
     for (key, value) in kwargs
-        MOI.set(optimizer, MOI.RawParameter(key), value)
+        MOI.set(optimizer, MOI.RawOptimizerAttribute("$(key)"), value)
     end
 
     MOI.optimize!(optimizer)
